@@ -317,3 +317,62 @@ for ((letter, binary) in binaryPage) {
 }
 ```
 - 자바의 get/put 대신 map[key]나 map[key]=value를 통해 값을 가져오고 세팅할 수 있음
+
+#### in으로 컬렉션이나 범위의 원소 검사
+```kotlin
+// !in 연산자를 통해 범위안에 속하는지 검사
+fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z'
+
+// !in 연산자를 통해 범위안에 속하지 않는지 검사
+fun isNotDigit(c: Char) = c !in '0'..'9'
+```
+- `in`연산자를 사용해 어떤 값이 범위에 속하는지 검사할 수 있음
+- `in`과  `!in` 연산자를 `when` 식에서 사용해도 됨
+```kotlin
+fun recognize(c: Char) = when(c) {
+  in '0'..'9' -> "It's a digit!"
+  in 'a'..'z', in 'A'..'Z' -> "It's a letter!"
+  else -> "I don't know"
+}
+```
+- 비교 가능한 클래스라면 클래스의 인스턴스 객체를 사용해 범위를 만들 수 있음
+
+## 코틀린의 예외 처리
+- 코틀린 예외처리는 자바나 다른 언어의 예외 처리와 비슷
+```kotlin
+if (percentage !in 0..100) {
+  throw IllegalArgumentException(
+    "A percentage value must be between 0 and 100: $percentage"
+  )
+}
+```
+#### try, catch, finally
+```kotlin
+fun readNumber(reader: BufferedReader): Int? {  // 함수가 던질 수 있는 예외라고 명시할 필요 없음
+  try {
+    val line = raeder.readLine()
+    return Integer.parseInt()
+  }
+  catch (e: NumberFormatException) {
+    return null
+  }
+  finally {
+    reader.close()
+  }
+}
+```
+- 자바와 큰 차이점은 함수 선언 뒤 `throws IOException`을 선언할 필요 없음
+- 그리고 코틀린에선 언체크 예외를 구별하지 않음
+  - 함수가 던지는 예외를 지정하지 않고 발생한 예외를 잡아내도 되고, 잡아내지 않아도 됨
+
+#### try를 식으로 사용
+```kotlin
+fun readNumber(reader: BufferedNumber) {
+  val number = try {
+    Integer.parseInt(reader.readLine())
+  } catch (e: NumberFormatException) {
+    return
+  }
+  println(number)
+}
+```
