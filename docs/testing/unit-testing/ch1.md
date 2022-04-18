@@ -17,7 +17,7 @@ sidebar_position: 1
 - 테스트가 없는 일반 프로젝트는 초반 작업 소요 시간은 빠르지만, 프로젝트 진행도가 길어질수록 기하급수적으로 작업시간이 증가함
 - 반면 테스트가 있는 프로젝트는 초반 작업 소요 시간은 느리지만, 프로젝트 진행도가 길어짐에도 일정한 작업 소요 시간이 걸리게 됨
 
-  ![image](https://user-images.githubusercontent.com/4207192/163184420-c1c7f4cf-c6cc-46c3-a824-370ee3afb5dd.png)
+![image](https://user-images.githubusercontent.com/4207192/163184420-c1c7f4cf-c6cc-46c3-a824-370ee3afb5dd.png)
 
 - 지속적인 정리와 리팩토링이 없으면 시스템은 점점 더 복잡
   - 소프트웨어 엔트로피(무질서)가 증가
@@ -28,7 +28,7 @@ sidebar_position: 1
 - 잘못 작성된 테스트도 초반에 코드가 나빠지는 것을 늦출 수 있음
 - 프로젝트 침체 단계에 진입하는 걸 조금 늦출 뿐
 
-  ![image](https://user-images.githubusercontent.com/4207192/163541045-1d6c300d-c5c8-4909-87ca-44cca54a9aba.png)
+![image](https://user-images.githubusercontent.com/4207192/163541045-1d6c300d-c5c8-4909-87ca-44cca54a9aba.png)
 
 - 테스트의 가치와 유지 비용을 모두 고려
   - 기반 코드를 리팩토링 시 테스트도 리팩토링
@@ -43,6 +43,7 @@ sidebar_position: 1
 
 #### 코드 커버리지 지표에 대한 이해
 > 코드 커버리지(테스트 커버리지) = 실행 코드 라인 수 / 전체 라인 수
+
 - 개발자가 어떻게 개발하냐에 따라 커버리지 숫자를 가지고 장난칠 수 있음
   ```java
   public boolean isString(String input) {
@@ -76,18 +77,19 @@ sidebar_position: 1
 #### 분기 커버리지 지표에 대한 이해
 - if문, switch문과 같은 제어 구조에 중점
 - 테스트 스위트 내 테스트가 통과하는 제어 구조의 수를 나타냄
+
 > 분기 커버리지 = 통과 분기 / 전체 분기 수
 
-  ```java
-  public boolean isString(String input) {
-    return input.length > 5
-  }
-  
-  public void test() {
-    boolean result = isString("abc")
-    assertThat(result).isFalse()
-  }
-  ```
+```java
+public boolean isString(String input) {
+  return input.length > 5
+}
+
+public void test() {
+  boolean result = isString("abc")
+  assertThat(result).isFalse()
+}
+```
 - 위 테스트 케이스에선 false인 경우만 테스트함
 - 그래서 분기 커버리지는 50%임
 
