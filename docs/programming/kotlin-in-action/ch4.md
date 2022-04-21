@@ -1,8 +1,7 @@
 ---
 sidebar_position: 4
+title: 4. 클래스, 객체, 인터페이스
 ---
-
-# 4. 클래스, 객체, 인터페이스
 
 ## 1. 클래스 계층 정의
 
@@ -58,5 +57,3 @@ class Button: Clickable, Focusable {
     }
 }
 ```
-#### open, final, abstract 변경자: 기본적으로 final
-
