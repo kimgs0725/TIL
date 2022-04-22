@@ -57,3 +57,52 @@ class Button: Clickable, Focusable {
     }
 }
 ```
+#### open, final, abstract 변경자: 기본적으로 final
+
+- Effective Java에선 **상속을 위한 설계와 문서를 갖추거나, 그럴 수 없다면 상속을 금지하라**라고 조언함
+- 코틀린 클래스와 메소드도 기본적으로 `final`
+  - 상속을 허용하려면 클래스 앞에 `open` 변경자 붙여야 함
+```kotlin
+open class RichButton: Clickable {
+  fun disable() {}        // 이 함수는 파이널. 하위 클래스가 오버라이드 X
+  open fun animate() {}   // 이 함수는 열려있음. 하위 클래스가 오버라이드 O
+  override fun click() {} // 오버라이드 함수. 하위 클래스가 오버라이드 O
+  // 만약 오버라이드 함수를 하위 클래스에서 오버라이드를 원치 않는다면 final을 붙임
+  final override fun click() {}
+}
+```
+
+- `abstract` 클래스는 인스턴스화 X
+- `abstract` 내 추상 멤버는 항상 open이 기본
+
+```kotlin
+abstract class Animated {
+  abstract fun animate()  // 추상 멤버는 구현 x, 하위 클래스에서 오버라이드 해야함
+
+  open fun stopAnimating() {} // 비추상 함수는 기본적으로 final. 오버라이드를 원한다면 open 붙임
+
+  fun animateTwice() {}
+}
+```
+
+|변경자|이 변경자가 붙은 멤버|설명|
+|---|---|---|
+|final|오버라이드 X|클래스 멤버의 기본 변경자|
+|open|오버라이드 O|반드시 open을 명시해야 오버라이드 할 수 있음|
+|abstract|반드시 오버라이드 해야함|추상 클래스 멤버에만 적용 가능. 추상 멤버는 구현 X|
+|override|상위 클래스, 인스턴스의 멤버를 오버라이드|오버라이드 멤버는 기본적으로 open. 하위 클래스에 오버라이드를 원치 않으면 final 붙임|
+
+#### 가시성 변경자: 기본적으로 공개
+
+- 기존 가시성 변경자는 `public`
+- 패키지 전용 가시성 변경자로 `internal`이 있음
+  - 모듈 내부에서만 접근 가능
+- 최상위 선언에 대해 `private` 가시성을 허용
+  - 비공개 기사성인 최상위 선언은 그 선언이 들어있는 파일 내부에서만 사용 가능
+
+|변경자|클래스 멤버|최상위 선언|
+|---|---|---|
+|public(기본 가시성)|모든 곳에서 볼 수 있음|모든 곳에서 볼 수 있음|
+|internal|같은 모듈 안에서만 볼 수 있음|같은 모듈 안에서만 볼 수 있음|
+|protected|하위 클래스 안에서만 볼 수 있음|(최상위 선언에 적용할 수 없음)|
+|private|같은 클래스 안에서만 볼 수 있음|같은 파일 안에사만 볼 수 있음|
