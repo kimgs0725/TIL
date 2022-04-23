@@ -106,3 +106,98 @@ abstract class Animated {
 |internal|같은 모듈 안에서만 볼 수 있음|같은 모듈 안에서만 볼 수 있음|
 |protected|하위 클래스 안에서만 볼 수 있음|(최상위 선언에 적용할 수 없음)|
 |private|같은 클래스 안에서만 볼 수 있음|같은 파일 안에사만 볼 수 있음|
+
+#### 내부 클래스와 중첩된 클래스: 기본적으로 중첩 클래스
+
+- 클래스 안에 다른 클래스를 선언할 수 있음
+- 자바와의 차이는 **중첩 클래스**는 명시적으로 요청하지 않는 한 바깥쪽 클래스 인스턴스에 대한 접근 권한이 없다는 점
+
+```kotlin
+interface State: Serializable
+
+interface View {
+  fun getCurrentState(): State
+  fun restoreState(state: State)
+}
+```
+- `Button` 클래스 상태를 저장하는 클래스는 `Button` 클래스 내부에 선언
+
+```java
+public class Button implements View {
+  @Override
+  public State getCurrentState() {
+    return new ButtonState()
+  }
+
+  @Override
+  public void restoreState(State state) { ... }
+  
+  public class ButtonState implements State {
+    /**
+    * ButtonState 클래스 정의
+    */
+  }
+}
+```
+- `ButtonState`를 직렬화하면 `NotSerializableException` 오류 발생
+  - 자바에서 클래스 안에 정의한 클래스는 내부 클래스로 취급
+  - 바깥쪽 Button 클래스에 대한 참조를 묵시적으로 포함
+  - 그 참조로 인해 `ButtonState`은 직렬화할 수 없음
+- 자바에선 이 문제를 해결하기 위해 `static`으로 선언해야함
+
+```kotlin
+class Button: View {
+  override fun getCurrentState(): State = ButtonState()
+
+  override fun restoreState(state: State) { ... }
+
+  class ButtonState: State {
+    /**
+    * ButtonState 클래스 정의
+    */
+  }
+}
+```
+- 코틀린 중첩 클래스에 아무런 변경자가 없으면 자바 static 중첩 클래스와 동일
+- 내부 클래스로 변경하여 바깥쪽 참조를 포함하고 싶으면 `inner` 변경자를 붙이면 됨
+
+![image](https://user-images.githubusercontent.com/4207192/164894105-13d0c1d8-a585-4173-8fe9-3becca3ab335.png)
+
+- 내부에서 바깥쪽 클래스를 참조하기 위해서는 `this@Outer`를 통해 참조할 수 있음
+
+#### 봉인된 클래스: 클래스 계층 정의 시 계층 확장 제한
+
+- [2.3.5절에 있는 클래스 계층](https://kimgs0725.github.io/til/docs/programming/kotlin-in-action/ch2#%EC%8A%A4%EB%A7%88%ED%8A%B8-%EC%BA%90%EC%8A%A4%ED%8A%B8-%ED%83%80%EC%9E%85-%EA%B2%80%EC%82%AC%EC%99%80-%ED%83%80%EC%9E%85-%EC%BA%90%EC%8A%A4%ED%8A%B8%EB%A5%BC-%EC%A1%B0%ED%95%A9)을 다시 가져와서
+```kotlin
+interface Expr
+class Num(val value: Int): Expr
+class Sum(val left: Expr, val right: Expr): Expr
+```
+- when 식에서 Num과 Sum이 아닌 경우 else 분기를 넣어야 함
+
+```kotlin
+fun eval(e: Expr) {
+  when (e) {
+    is Num -> e.val
+    is Sum -> eval(e.right) + eval(e.left)
+    else ->
+      throw IllegalArgumentException("Unknown expression")
+  }
+}
+```
+- 코틀린은 이 문제를 해결하기 위해 `sealed` 클래스를 제공함
+  - `sealed`는 상위 클래스를 상혹한 하위 클래스 정의를 제한시킬 수 있음
+```kotlin
+sealed class Expr {
+  class Num(val value: Int): Expr()
+  class Sum(val left: Expr, val right: Expr): Expr()
+}
+
+fun eval(e: Expr) {
+  when (e) {  // when식에서 모든 하위 클래스를 검사하므로 별도의 else 분기가 없어도 됨
+    is Expr.Num -> e.val
+    is Expr.Sum -> eval(e.right) + eval(e.left)
+  }
+}
+```
+
