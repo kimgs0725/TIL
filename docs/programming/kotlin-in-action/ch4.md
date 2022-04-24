@@ -201,3 +201,106 @@ fun eval(e: Expr) {
 }
 ```
 
+## 2. 뻔하지 않은 생성자와 프로퍼티를 갖는 클래스 선언
+
+- 코틀린에선 생성자를 주 생성자와 부 생성자로 구분
+  - 초기화 블록을 통해 초기화 로직을 추가
+
+#### 클래스 초기화: 주 생성자와 초기화 블록
+
+- 클래스 이름 뒤에 오는 괄호로 둘러싸인 코드를 **주 생성자**라고 함
+```kotlin
+class User constructro (_nickname: String) {  // 파라미터가 하나만 있는 주 생성자
+  val nickname: String
+  init {    // 초기화 블록
+    nickname = _nickname
+  }
+}
+```
+
+- `constructor`는 주 생성자와 부 생성자를 정의내릴 때 사용
+- `init`은 초기화 블록을 시작
+  - 클래스 안에 여러 초기화 블록을 선언할 수 있음
+- 주 생성자 앞에 별다른 애노테이션이나 가시성 변경자가 없다면 `constructor`는 생략 가능
+
+```kotlin
+class User(_nickname: String) {
+  val nickname = _nickname
+}
+```
+
+- 주 생성자 파라미터 이름 앞에 `val`을 추가하면 프로퍼티 정의와 초기화를 간략화할 수 있음
+
+```kotlin
+class User(val nickname: String)
+```
+
+- 함수와 마찬가지로 디폴트 파라미터를 정의할 수 있음
+- 인스턴스 생성은 `new` 키워드 없이 생성해야 함
+- 상속 시, 부모 클래스로 넘겨야할 파라미터가 있다면 부모클래스 이름 뒤에 괄호치고 생성인자를 넘길 수 있음
+
+```kotlin
+open class User(val nickname: String) { ... }
+
+class TwitterUser(nickname: String): User(nickname) { ... }
+```
+
+- 부모 클래스에 파라미터가 없더라도, 빈 괄호는 표시해야함
+  - 단, 인터페이스의 경우 인스턴스로 생성될 수 없기에 괄호는 표시하지 않음
+- 클래스 외부에서 인스턴스화하지 못하게 막고 싶으면 모든 생성자를 private으로 변경하면 됨
+
+```kotlin
+class Secretive private constructor() { ... }
+```
+
+#### 부 생성자: 상위 클래스를 다른 방식으로 초기화
+
+- 생성자가 많이 필요한 자바와 달리, 코틀린에선 디폴트 파라미터와 이름 붙은 인자 문법으로 오버로드를 해결할 수 있음
+- 그럼에도 생성자가 여럿 필요한 경우
+  - 프레임워크 클래스를 확장해야 하는데, 여러 가지 방법으로 인스턴스를 초기화할 수 있게 다양한 생성자를 지원해야하는 경우
+
+```kotlin
+open class View {
+  constructor(ctx: Context) {
+    ...
+  }
+
+  constructor(ctx: Context, attr: AttributeSet) {
+    ...
+  }
+}
+```
+
+- 클래스를 확장하면서 똑같이 부 생성자를 정의할 수 있음
+
+```kotlin
+class MyButton : View {
+  constructor(ctx: Context) : super(ctx) {
+    ...
+  }
+
+  constructor(ctx: Context, attr: AttributeSet) : super(ctx, attr) {
+    ...
+  }
+}
+```
+
+- `this`를 통해 클래스 자신의 다른 생성자 호출 가능
+
+```kotlin
+class MyButton : View {
+  constructor(ctx: Context) : this(ctx, MY_STYLE) { // 이 클래스의 다른 생성자에게 위임
+  }
+
+  constructor(ctx: Context, attr: AttributeSet) : super(ctx, attr) {
+    ...
+  }
+}
+
+```
+
+- 부 생성자가 필요한 이유는 자바 상호운용성 때문
+- 그리고 다른 생성 방법이 여럿 존재하는 경우에도 부 생성자가 필요
+
+#### 인터페이스에 선언된 프로퍼터 구현
+
