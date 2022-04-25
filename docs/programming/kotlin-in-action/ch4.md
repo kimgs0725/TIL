@@ -304,3 +304,66 @@ class MyButton : View {
 
 #### 인터페이스에 선언된 프로퍼터 구현
 
+- 인터페이스에 추상 프로퍼티 선언을 넣을 수 있음
+
+```kotlin
+interface User {
+  val nickname: String
+}
+```
+
+- 이는 인터페이스를 구현하는 클래스에서 추상 프로퍼티를 구현해야함
+- 그럼 클래스에서 이 프로퍼티를 어떻게 구현해야할까?
+
+```kotlin
+class PrivateUser(override val nickname: String): User  // 주 생성자에 있는 프로퍼티
+
+class SubscribingUser(val email: String): User {
+  override val nickname: String
+    get() = email.substringBefore('@')    // 커스텀 게터
+}
+
+class FacebookUser(val accountId: Int): User {
+  override val nickname = getFacebookName(accountId)    // 프로퍼티 초기화 식
+}
+```
+
+- 인터페이스에는 추상 프로퍼티뿐만 아니라 게터와 세터가 잇는 프로퍼티를 선언할 수 있음
+  - 단, 게터, 세터를 뒷받침할 필드를 참조할 수 없음
+
+#### 게터와 세터에서 뒷받침하는 필드에 접근
+
+- 값을 저장하는 동시에 로직을 실행할 수 있게 하기 위해서는 접근자 안에서 프로퍼티를 뒷받침하는 필드에 접근할 수 있어야 하ㅣㅁ
+- 프로퍼티에 저장된 값을 로그로 남기려는 경우를 생각
+
+```kotlin
+class User(val name: String) {
+  var address: String = "unspecified"
+    set(value: String) {
+      println("""
+        Address was changed for $name:
+        "$field" -> "$value".""".trimIndent())
+      )
+      field = value
+    }
+}
+```
+
+- 접근자 본문에서 `field`라는 특별한 식별자를 통해 뒷받침하는 필드에 접근할 수 있음
+- 컴파일러는 디폴트 접근자 구현을 사용하건 직접 게터나 세터를 정의하건 관계없이 게터나 세터에서 `field`를 사용하는 프로퍼티에 대해 뒷받침하는 필드를 생성함
+
+#### 접근자의 가시성 변경
+
+- 기본적으로는 프로퍼티의 가시성과 같음
+- 원한다면 `get`이나 `set` 앞에 가시성 변경자를 추가해서 가시성을 변경할 수 있음
+
+```kotlin
+class LengthCounter {
+  var counter: Int = 0
+    private set
+  
+  fun addWord(word: String) {
+    counter += word.length
+  }
+}
+```
