@@ -8,7 +8,7 @@ title: 4. 클래스, 객체, 인터페이스
 - 코틀린 가시성/접근 변경자는 자바와 비슷하지만 아무것도 지정하지 않는 경우 기본 가시성은 다름
 - `sealed`는 클래스 상속을 제한
 
-#### 코틀린 인터페이스
+### 코틀린 인터페이스
 
 - 코틀린 인터페이스 안에 구현 메소드도 정의할 수 있음
 - `interface`로 인터페이스 선언
@@ -57,7 +57,7 @@ class Button: Clickable, Focusable {
     }
 }
 ```
-#### open, final, abstract 변경자: 기본적으로 final
+### open, final, abstract 변경자: 기본적으로 final
 
 - Effective Java에선 **상속을 위한 설계와 문서를 갖추거나, 그럴 수 없다면 상속을 금지하라**라고 조언함
 - 코틀린 클래스와 메소드도 기본적으로 `final`
@@ -92,7 +92,7 @@ abstract class Animated {
 |abstract|반드시 오버라이드 해야함|추상 클래스 멤버에만 적용 가능. 추상 멤버는 구현 X|
 |override|상위 클래스, 인스턴스의 멤버를 오버라이드|오버라이드 멤버는 기본적으로 open. 하위 클래스에 오버라이드를 원치 않으면 final 붙임|
 
-#### 가시성 변경자: 기본적으로 공개
+### 가시성 변경자: 기본적으로 공개
 
 - 기존 가시성 변경자는 `public`
 - 패키지 전용 가시성 변경자로 `internal`이 있음
@@ -107,7 +107,7 @@ abstract class Animated {
 |protected|하위 클래스 안에서만 볼 수 있음|(최상위 선언에 적용할 수 없음)|
 |private|같은 클래스 안에서만 볼 수 있음|같은 파일 안에사만 볼 수 있음|
 
-#### 내부 클래스와 중첩된 클래스: 기본적으로 중첩 클래스
+### 내부 클래스와 중첩된 클래스: 기본적으로 중첩 클래스
 
 - 클래스 안에 다른 클래스를 선언할 수 있음
 - 자바와의 차이는 **중첩 클래스**는 명시적으로 요청하지 않는 한 바깥쪽 클래스 인스턴스에 대한 접근 권한이 없다는 점
@@ -165,7 +165,7 @@ class Button: View {
 
 - 내부에서 바깥쪽 클래스를 참조하기 위해서는 `this@Outer`를 통해 참조할 수 있음
 
-#### 봉인된 클래스: 클래스 계층 정의 시 계층 확장 제한
+### 봉인된 클래스: 클래스 계층 정의 시 계층 확장 제한
 
 - [2.3.5절에 있는 클래스 계층](https://kimgs0725.github.io/til/docs/programming/kotlin-in-action/ch2#%EC%8A%A4%EB%A7%88%ED%8A%B8-%EC%BA%90%EC%8A%A4%ED%8A%B8-%ED%83%80%EC%9E%85-%EA%B2%80%EC%82%AC%EC%99%80-%ED%83%80%EC%9E%85-%EC%BA%90%EC%8A%A4%ED%8A%B8%EB%A5%BC-%EC%A1%B0%ED%95%A9)을 다시 가져와서
 ```kotlin
@@ -206,7 +206,7 @@ fun eval(e: Expr) {
 - 코틀린에선 생성자를 주 생성자와 부 생성자로 구분
   - 초기화 블록을 통해 초기화 로직을 추가
 
-#### 클래스 초기화: 주 생성자와 초기화 블록
+### 클래스 초기화: 주 생성자와 초기화 블록
 
 - 클래스 이름 뒤에 오는 괄호로 둘러싸인 코드를 **주 생성자**라고 함
 ```kotlin
@@ -253,7 +253,7 @@ class TwitterUser(nickname: String): User(nickname) { ... }
 class Secretive private constructor() { ... }
 ```
 
-#### 부 생성자: 상위 클래스를 다른 방식으로 초기화
+### 부 생성자: 상위 클래스를 다른 방식으로 초기화
 
 - 생성자가 많이 필요한 자바와 달리, 코틀린에선 디폴트 파라미터와 이름 붙은 인자 문법으로 오버로드를 해결할 수 있음
 - 그럼에도 생성자가 여럿 필요한 경우
@@ -302,7 +302,7 @@ class MyButton : View {
 - 부 생성자가 필요한 이유는 자바 상호운용성 때문
 - 그리고 다른 생성 방법이 여럿 존재하는 경우에도 부 생성자가 필요
 
-#### 인터페이스에 선언된 프로퍼터 구현
+### 인터페이스에 선언된 프로퍼터 구현
 
 - 인터페이스에 추상 프로퍼티 선언을 넣을 수 있음
 
@@ -331,7 +331,7 @@ class FacebookUser(val accountId: Int): User {
 - 인터페이스에는 추상 프로퍼티뿐만 아니라 게터와 세터가 잇는 프로퍼티를 선언할 수 있음
   - 단, 게터, 세터를 뒷받침할 필드를 참조할 수 없음
 
-#### 게터와 세터에서 뒷받침하는 필드에 접근
+### 게터와 세터에서 뒷받침하는 필드에 접근
 
 - 값을 저장하는 동시에 로직을 실행할 수 있게 하기 위해서는 접근자 안에서 프로퍼티를 뒷받침하는 필드에 접근할 수 있어야 하ㅣㅁ
 - 프로퍼티에 저장된 값을 로그로 남기려는 경우를 생각
@@ -352,7 +352,7 @@ class User(val name: String) {
 - 접근자 본문에서 `field`라는 특별한 식별자를 통해 뒷받침하는 필드에 접근할 수 있음
 - 컴파일러는 디폴트 접근자 구현을 사용하건 직접 게터나 세터를 정의하건 관계없이 게터나 세터에서 `field`를 사용하는 프로퍼티에 대해 뒷받침하는 필드를 생성함
 
-#### 접근자의 가시성 변경
+### 접근자의 가시성 변경
 
 - 기본적으로는 프로퍼티의 가시성과 같음
 - 원한다면 `get`이나 `set` 앞에 가시성 변경자를 추가해서 가시성을 변경할 수 있음
@@ -370,7 +370,7 @@ class LengthCounter {
 
 ## 3. 컴파일러가 생성한 메소드: 데이터 클래스와 클래스 위임 
 
-#### 모든 클래스가 정의해야하는 메소드
+### 모든 클래스가 정의해야하는 메소드
 
 - 코틀린도 `toString`, `equals`, `hashCode`등을 오버라이드 해야함
 - 다음 클래스가 있다고 가정
@@ -379,7 +379,7 @@ class LengthCounter {
 class Client(val name: String, val postalCode: Int)
 ```
 
-##### 문자열 표현: toString()
+#### 문자열 표현: toString()
 - 기본으로 제공되는 문자열 표현은 `Client@5e9f23b4`와 같이 표현
 - 오버라이드를 통해 유용한 정보를 뿌리는 `toString`으로 재정의할 수 있음
 
@@ -389,7 +389,7 @@ class Client(val name: String, val postalCode: Int) {
 }
 ```
 
-##### 객체의 동등성: equals()
+#### 객체의 동등성: equals()
 
 - 때때로 서로 다른 객체가 동일한 데이터를 포함한 경우, 그 둘을 동등한 객체로 간주해야하는 경우도 존재
   - 동등성 연산에는 `==`을 샤용
@@ -408,7 +408,7 @@ class Client(val name: String, val postalCode: Int) {
 }
 ```
 
-##### 해시 컨테이너: hashCode()
+#### 해시 컨테이너: hashCode()
 
 - `equals`를 오버라이드할 때 반드시 `hashCode`도 오버라이드해야 함
 - JVM 언어에선 `hashCode`가 지켜야하는 제약이 존재
@@ -430,7 +430,7 @@ class Client(val name: String, val postalCode: Int) {
 }
 ```
 
-#### 데이터 클래스: 모든 클래스가 정의해야 하는 메소드 자동 생성
+### 데이터 클래스: 모든 클래스가 정의해야 하는 메소드 자동 생성
 
 - `data` 라는 변경자를 클래스 앞에 붙이면 컴파일러가 자동으로 `toString()`, `equals()`, `hashCode()`을 만들어줌
 
@@ -444,7 +444,7 @@ data class Client(val name: String, val postalCode: Int)
   - 클래스의 각 필드를 선언 순서대로 표시하여 문자열로 표현하는 `toString`
 - 위 메소드 말고도 `copy()` 메소드도 자동 구현해줌
 
-#### 클래스 위임: by 키워드 사용
+### 클래스 위임: by 키워드 사용
 
 - 대규모 설계 시, 구현 상속은 시스템을 취약하게 만듦
 - 코틀린에선 기본적으로 클래스를 `final`로 두어 함부로 상속하지 못하게 함
@@ -495,3 +495,135 @@ class CountingSet<T>(
   - **객체 선언**은 싱글턴을 정의하는 방법 중 하나
   - **동반 객체**는 인스턴스 메소드는 아니지만 어떤 클래스와 관련있는 메소드와 팩토리 메소드를 담을 때 쓰임
   - 객체 식은 자바의 **무명 내부 객체** 대신 쓰임
+
+### 객체 선언: 싱글턴 쉽게 만들기
+
+- 인스턴스가 하나만 필요한 클래스를 만들기 위해 [싱글턴 패턴](https://ko.wikipedia.org/wiki/%EC%8B%B1%EA%B8%80%ED%84%B4_%ED%8C%A8%ED%84%B4)을 자주 이용함
+- 코틀린에선 **객체 선언** 기능을 이용해 싱글턴을 언어상에서 기본 지원
+
+```kotlin
+object Payroll {
+  val allEmployees = arrayListOf<Person>()
+  fun calculateSalary() {
+    for (person in allEmployees) {
+      ...
+    }
+  }
+}
+
+>>> Payroll.allEmployees.add(Person(...))
+>>> Payroll.calculateSalary()
+```
+
+- 객체 선언 뒤에 .을 붙여 객체에 속한 프로퍼티나 메소드에 접근
+- 객체 선언도 클래스나 인스턴스를 상속할 수 있음
+
+```kotlin
+object CaseInsensitiveFileComparator : Comparator<File> {
+  override fun compare(file1: File, file2: File): Int {
+    return file1.path.compareTo(file2.path, ignoreCase = true)
+  }
+}
+```
+
+> **싱글턴과 의존관계 주입**
+> 
+> 싱글턴 패턴과 마찬가지 이유로 대규모 소프트웨어 시스템에서는 객체 선언이 항상 적합하지는 않다.
+> 의존 관계가 별로 많지 않은 소규모 소프트웨어에서는 싱글턴이나 객체 선언이 유용하지만,
+> 시스템을 구현하는 다양한 구성 요소와 상호작용하는 대규모 컴포넌트에는 싱글턴이 적합하지 않다.
+> 이유는 객체 생성을 제어할 방법이 없고 생성자 파라미터를 지정할 수 없어서이다.
+>
+> 생성을 제어할 수 없고 생성자 파라미터를 지정할 수 없으므로 단위 테스트를 하거나 소프트웨어
+> 시스템의 설정이 달라질 때 객체를 대체하거나 객체를 의존관계를 바꿀 수 없다.
+> 따라서 그런 기능이 필요하다면 자바와 마찬가지로 의존관계 주입 프레임워크와 코틀린 클래스를 함께 사용해야한다.
+
+- 클래스 안에 `object`를 선언할 수 있음
+  - 이 역시 한번만 생성됨
+
+```kotlin
+data class Person(val name: String) {
+  object NameComparator : Comparator<Person> {
+    override fun compare(p1: Person, p2: Person): Int = p1.name.compareTo(p2.name)
+  }
+}
+
+>>> val persons = listOf(Person("Bob"), Person("Alice"))
+>>> println(persons.sortedWith(Person.NameComparator))
+[Person(name=Alice), Person(name=Bob)]
+```
+
+### 동반 객체: 팩토리 메소드와 정적 멤버가 들어갈 장소
+
+- 코틀린 클래스에선 `static`을 지원하지 않기 때문에 패키지 수준의 **최상위 함수**와 **객체 선언**을 주로 활용
+  - 하지만 최상위 함수는 객체 내 private 멤버에 접근할 수 없음
+- 클래스의 인스턴스와 관계없이 호출, but 클래스 내부 정보에 접근해야하는 함수가 필요 -> 중첩된 객체 선언을 멤버 함수로 정의
+  - 팩토리 메소드를 예로 들 수 있음
+
+  ![image](https://user-images.githubusercontent.com/4207192/165403569-04326497-3675-4d97-b4ae-56dcf7cf0c48.png)
+
+- `companion` 키워드를 통해 클래스의 동반 객체를 만들 수 있음
+- 동반 객체는 자신을 둘러싼 클래스의 모든 `private` 멤버에 접근 가능
+
+```kotlin
+// without 동반 객체
+class User {
+  val nickname: String
+
+  constructor(email: String) {
+    nickname = email.substringBefore('@')
+  }
+
+  constructor(facebookAccountId: Int) {
+    nickname = getFacebookName(facebookAccountId)
+  }
+}
+
+// with 동반 객체
+class User private constructor(val nickname: String) {  // 주 생성자를 비공개로 만듦
+  companion object {
+    fun newSubscribingUser(email: String) =
+      User(email.substringBefore('@'))
+
+    fun newFacebookUser(accountId: Int) =
+      User(getFacebookName(accountId))
+  }
+}
+```
+
+- 다만 클래스를 확장해야하는 경우, 하위 클래스에서 오버라이드 할 수 없으므로 여러 생성자를 사용하는게 좋음
+
+### 동반 객체를 일반 객체처럼 사용
+
+- 동반 객체도 일반 객체
+  - 일반 객체처럼 이름을 붙이거나
+  - 인터페이스를 상속
+  - 확장 함수와 프로퍼티를 정의할 수 있음
+
+#### 동반 객체에 이름 부여
+
+```kotlin
+class Person(val name: String) {
+  companion object Loader {
+    fun fromJSON(jsonText: String): Person = ...
+  }
+}
+
+>>> Person.Loader.fromJSON(...)
+>>> Person.fromJSON(...)
+```
+
+#### 동반 객체에서 인터페이스 구현
+
+- `object`처럼 인터페이스를 구현할 수 있음
+
+```kotlin
+interface JSONFactory<T> {
+  fun fromJSON(jsonText: String): T
+}
+
+class Person(val name: String) {
+  companion object : JSONFactory<Person> {
+    override fun fromJSON(jsonText: String): Person = ...
+  }
+}
+```
