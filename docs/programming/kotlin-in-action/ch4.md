@@ -367,3 +367,131 @@ class LengthCounter {
   }
 }
 ```
+
+## 3. 컴파일러가 생성한 메소드: 데이터 클래스와 클래스 위임 
+
+#### 모든 클래스가 정의해야하는 메소드
+
+- 코틀린도 `toString`, `equals`, `hashCode`등을 오버라이드 해야함
+- 다음 클래스가 있다고 가정
+
+```kotlin
+class Client(val name: String, val postalCode: Int)
+```
+
+##### 문자열 표현: toString()
+- 기본으로 제공되는 문자열 표현은 `Client@5e9f23b4`와 같이 표현
+- 오버라이드를 통해 유용한 정보를 뿌리는 `toString`으로 재정의할 수 있음
+
+```kotlin
+class Client(val name: String, val postalCode: Int) {
+  override fun toString() = "Client(name=$name, postalCode=$postalCode)"
+}
+```
+
+##### 객체의 동등성: equals()
+
+- 때때로 서로 다른 객체가 동일한 데이터를 포함한 경우, 그 둘을 동등한 객체로 간주해야하는 경우도 존재
+  - 동등성 연산에는 `==`을 샤용
+- 위 요구사항을 만족시키기 위해 `equals`을 구현
+
+```kotlin
+class Client(val name: String, val postalCode: Int) {
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other !is Client) {
+      return false
+    }
+    return name == other.name && postalCode == other.postalCode
+  }
+
+  override fun toString() = "Client(name=$name, postalCode=$postalCode)"
+}
+```
+
+##### 해시 컨테이너: hashCode()
+
+- `equals`를 오버라이드할 때 반드시 `hashCode`도 오버라이드해야 함
+- JVM 언어에선 `hashCode`가 지켜야하는 제약이 존재
+
+  > equals()가 true를 반환하는 두 객체는 반드시 같은 hashCode()를 반환해야한다
+
+```kotlin
+class Client(val name: String, val postalCode: Int) {
+  override fun hashCode(): Int = name.hashCode() * 31 + postalCode
+
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other !is Client) {
+      return false
+    }
+    return name == other.name && postalCode == other.postalCode
+  }
+
+  override fun toString() = "Client(name=$name, postalCode=$postalCode)"
+}
+```
+
+#### 데이터 클래스: 모든 클래스가 정의해야 하는 메소드 자동 생성
+
+- `data` 라는 변경자를 클래스 앞에 붙이면 컴파일러가 자동으로 `toString()`, `equals()`, `hashCode()`을 만들어줌
+
+```kotlin
+data class Client(val name: String, val postalCode: Int)
+```
+
+- `data` 클래스는 다음 메소드를 포함
+  - 인스턴스가 비교를 위한 `equals`
+  - HashMap과 같은 해시 기반 컨테이너에서 키로 사용할 수 있는 `hashCode`
+  - 클래스의 각 필드를 선언 순서대로 표시하여 문자열로 표현하는 `toString`
+- 위 메소드 말고도 `copy()` 메소드도 자동 구현해줌
+
+#### 클래스 위임: by 키워드 사용
+
+- 대규모 설계 시, 구현 상속은 시스템을 취약하게 만듦
+- 코틀린에선 기본적으로 클래스를 `final`로 두어 함부로 상속하지 못하게 함
+- 대신 상속을 허용하지 않는 클래스에서 새로운 동작을 추가하려 할 때, 데코레이터 패턴을 사용
+  - 새로운 클래스에 기능을 정의하고, 기존 클래스는 새로운 클래스로 메소드 요청을 전달
+  - 하지만, 새로운 클래스를 만들어야 하기 때문에 복잡
+
+```kotlin
+class DelegatingCollection<T>: Collection<T> {
+  private val innerList = arrayListOf<T>()
+  override val size: Int get() = innerSize.size
+  override fun isEmpty(): Boolean = innerList.isEmpty()
+  override fun contains(element: T): Boolean = innerList.contains(element)
+  override fun iterator(): Iterator<T> = innerList.iterator()
+  override fun containsAll(elements: Collection<T>): Boolean = innerList.containsAll(elements)
+}
+```
+
+- 코틀린에선 인터페이스를 구현할 때, `by` 키워드를 통해 인터페이스에 대한 구현을 다른 객체에 위임 중이란 것을 명시할 수 있음
+- 메소드 중 일부 동작을 변경하고 싶은 메소드만 오버라이드하면 됨
+
+```kotlin
+class CountingSet<T>(
+    private val innerSet: MutableCollection<T> = HashSet<T>()
+) : MutableCollection<T> by innerSet {
+    var objectsAdded = 0
+
+    override fun add(element: T): Boolean {
+        objectsAdded++
+        return innerSet.add(element)
+    }
+
+    override fun addAll(elements: Collection<T>): Boolean {
+        objectsAdded += elements.size
+        return innerSet.addAll(elements)
+    }
+}
+>>> val cset = CountingSet<Int>()
+>>> cset.addAll(listOf(1, 1, 2))
+>>> println("${cset.objectsAdded} objects were added, ${cset.size} remain")
+3 objects were added, 2 remain
+```
+
+## 4. object 키워드: 클래스 선언과 인스턴스 생성
+
+- `object`는 선언과 동시에 인스턴스를 생성함
+- `object`를 쓰는 케이스는 다음과 같음
+  - **객체 선언**은 싱글턴을 정의하는 방법 중 하나
+  - **동반 객체**는 인스턴스 메소드는 아니지만 어떤 클래스와 관련있는 메소드와 팩토리 메소드를 담을 때 쓰임
+  - 객체 식은 자바의 **무명 내부 객체** 대신 쓰임
