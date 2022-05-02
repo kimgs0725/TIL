@@ -5,7 +5,7 @@ title: 2. 코틀린 기초
 
 ## 1. 기본 요소: 함수와 변수
 
-#### 함수의 특징
+### 함수의 특징
 ```kotlin
 fun main(args: Array<String>) {
   println("Hello, World")
@@ -18,7 +18,7 @@ fun main(args: Array<String>) {
   - 코틀린 표준 라이브러리에서 표준 자바 라이브러리를 간결하게 사용하기 위한 Wrapper를 제공
 - 세미클론 X
 
-#### 식이 본문인 함수
+### 식이 본문인 함수
 ```kotlin
 // case 1
 fun max(a: Int, b: Int): Int {
@@ -35,7 +35,7 @@ fun max(a: Int, b: Int) = if (a > b) a else b
   - 반대로 `case 1`처럼 중괄호로 이루어진 함수를 **블록으로 이루어진 함수**라고 함
 - `case 3`처럼반환 타입도 지정하지 않아도 되는데, **컴파일러가 타입을 분석(타입 추론)**해주기 떄문
 
-#### 변수
+### 변수
 ```kotlin
 val question = "삶, 우주, 그리고 모든 것에 대한 궁극적인 질문" // 타입지정 x -> 컴파일러가 String으로 추론
 val answer = 42 // 타입지정 x -> 컴파일러가 Int으로 추론
@@ -53,7 +53,7 @@ answer = 42
   ```
 - `var`: 변경 가능한 변수
 
-#### 더 쉽게 문자열 형식 지정: 문자열 템플릿
+### 더 쉽게 문자열 형식 지정: 문자열 템플릿
 ```kotlin
 fun main(args: Array<String>) {
   val name = if (args.size > 0) args[0] else "Kotlin"
@@ -91,7 +91,7 @@ class Person(name: String)
   - 이런 보일러 플레이트(반복적으로 찍어내는) 코드를 개선시키기 위해 롬복을 도입하기도 함
 - 코틀린에선 보일러 플레이트 코드를 값 객체(value object)라 부르는 객체를 통해 표현 가능
 
-#### 프로퍼티
+### 프로퍼티
 - 필드와 접근자를 한데 묶어 프로퍼티라 부름
   - 자바에선 접근제어자인 `public`, `private`와 접근자인 `getter`, `setter`를 제공할 수 있음
 - 코틀린은 프로퍼티를 언어 기본 기능으로 제공, 프로퍼티가 자바의 필드와 접근자 메소드를 완전히 대체
@@ -123,7 +123,7 @@ class Rectangle(val height: Int, val width: Int) {
 
 ## 3. 선택 표현과 처리: enum과 when
 
-#### enum 클래스 정의
+### enum 클래스 정의
 ```kotlin
 enum class Color {
   RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, VIOLET
@@ -141,7 +141,7 @@ enum class Color(
 }
 ```
 
-#### when으로 enum 클래스 다루기
+### when으로 enum 클래스 다루기
 - if와 마찬가지로 when도 값을 만들어내는 식
 - 식이 본문인 함수에 when을 바로 사용할 수 있음
 ```kotlin
@@ -178,7 +178,7 @@ fun getWarmth(color: Color) = when(color) {
     BLUE,INDIGO,VIOLET -> "cold"
   }
 ```
-#### when과 임의의 객체를 함께 사용
+### when과 임의의 객체를 함께 사용
 ```kotlin
 fun mix(c1: Color, c2: Color) =
   when(setOf(c1, c2)) {
@@ -190,7 +190,7 @@ fun mix(c1: Color, c2: Color) =
 ```
 - when의 분기 조건은 임의의 객체 허용
   - 자바의 switch 경우 상수만 가능
-#### 인자 없는 when 사용
+### 인자 없는 when 사용
 ```kotlin
 fun mixOptimized(c1: Color, c2: Color) =
   when {
@@ -208,7 +208,7 @@ fun mixOptimized(c1: Color, c2: Color) =
   - 코드를 읽기 어려워지지만, 성능 향상을 위해 필요할 수 있음
 - when의 인자 없이 작성할 수 있음
 
-#### 스마트 캐스트: 타입 검사와 타입 캐스트를 조합
+### 스마트 캐스트: 타입 검사와 타입 캐스트를 조합
 - 코틀린에선 `is` 키워드를 이용해 변수 타입을 검사
   - 자바의 `instanceof`와 비슷하지만, `instanceof`는 검사만하고 따로 캐스팅하지 않음
 - 코틀린은 `is` 키워드로 검사가 되면, 컴파일러가 캐스팅을 해줌
@@ -239,7 +239,7 @@ fun eval(e: Expr): Int =
   }
 ```
 
-#### if와 when 분기에서 블록 사용
+### if와 when 분기에서 블록 사용
 - if나 when 분기에 블록 사용할 수 있음. 그러면 블록의 **마지막 문장**이 블록 전체 결과가 됨
 ```kotlin
 fun eval(e: Expr): Int =
@@ -258,10 +258,10 @@ fun eval(e: Expr): Int =
   }
 ```
 
-## 대상을 이터레이션: while과 for 루프
+## 4. 대상을 이터레이션: while과 for 루프
 - for문의 경우 `for <아이템> in <원소들>` 형태를 취함
 
-#### while 루프
+### while 루프
 - 자바와 크게 다르지 않음
 ```kotlin
 while (조건) {
@@ -273,7 +273,7 @@ do {
 } while (조건)
 ```
 
-#### 수에 대한 이터레이션: 범위와 수열
+### 수에 대한 이터레이션: 범위와 수열
 - `..`연산자로 시작 값과 끝 값을 연결해서 범위를 만듦
   - `val oneToTen = 1..10`
 - 코틀린의 범위는 폐구간(닫힌 구간) 또는 양끝을 포함하는 구간
@@ -301,7 +301,7 @@ for (i in 1..100) {
   - `for (i in 1 until 100)` -> 1부터 99까지 루프를 돔
   - `for (i in 1..99)`와 동일
 
-#### 맵에 대한 이터레이션
+### 맵에 대한 이터레이션
 ```kotlin
 val binaryReps = TreeMap<Char, String>()
 
@@ -317,7 +317,7 @@ for ((letter, binary) in binaryPage) {
 ```
 - 자바의 get/put 대신 map[key]나 map[key]=value를 통해 값을 가져오고 세팅할 수 있음
 
-#### in으로 컬렉션이나 범위의 원소 검사
+### in으로 컬렉션이나 범위의 원소 검사
 ```kotlin
 // !in 연산자를 통해 범위안에 속하는지 검사
 fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z'
@@ -336,7 +336,7 @@ fun recognize(c: Char) = when(c) {
 ```
 - 비교 가능한 클래스라면 클래스의 인스턴스 객체를 사용해 범위를 만들 수 있음
 
-## 코틀린의 예외 처리
+## 4. 코틀린의 예외 처리
 - 코틀린 예외처리는 자바나 다른 언어의 예외 처리와 비슷
 ```kotlin
 if (percentage !in 0..100) {
@@ -345,7 +345,7 @@ if (percentage !in 0..100) {
   )
 }
 ```
-#### try, catch, finally
+### try, catch, finally
 ```kotlin
 fun readNumber(reader: BufferedReader): Int? {  // 함수가 던질 수 있는 예외라고 명시할 필요 없음
   try {
@@ -364,7 +364,7 @@ fun readNumber(reader: BufferedReader): Int? {  // 함수가 던질 수 있는 �
 - 그리고 코틀린에선 언체크 예외를 구별하지 않음
   - 함수가 던지는 예외를 지정하지 않고 발생한 예외를 잡아내도 되고, 잡아내지 않아도 됨
 
-#### try를 식으로 사용
+### try를 식으로 사용
 ```kotlin
 fun readNumber(reader: BufferedNumber) {
   val number = try {
