@@ -627,3 +627,70 @@ class Person(val name: String) {
   }
 }
 ```
+
+#### 동반 객체 확장
+
+- 동반 객체 안에 함수를 정의함으로써 클래스에 대해 호출할 수 있는 확장함수를 만들 수 있음
+  - `C`라는 클래스 안에 `C.Companion` 동반 객체 안에 `func`를 정의하면 외부에서 `func`를 `C.func`로 호출할 수 있음
+
+```kotlin
+class Person(val firstName:  String, val lastName: String) {
+  companion object {
+  }
+}
+
+fun Person.Companion.fromJSON(json: String): Person {
+  ...
+}
+
+val p = Person.fromJSON(json)
+```
+
+- 여기서 동반객체에 대한 확장 함수를 작성하려면, 원래 클래스에 동반 객체를 꼭 선언해야함(빈 내용이라도)
+
+### 객체 식: 무명 내부 클래스를 다른 방식으로 작성
+
+- 무명 객체를 정의할 때에도 `object` 키워드를 씀
+
+```kotlin
+// 무명 클래스로 이벤트 리스너 구현
+window.addMouseListener(
+  object: MouseAdapter() {   // MouseAdapter를 확장하는 무명 객체 선언
+    override fun mouseClicked(e: MouseEvent) {
+      ...
+    }
+
+    override fun mouseEntered(e: MouseEvent) {
+      ...
+    }
+  }
+)
+```
+
+- 객체 선언과 비슷하지만, 이름이 없다는 것이 특징
+- 객체 선언과 달리 무명 객체는 싱글턴이 아님. 식이 쓰일 때마다 인스턴스가 생성
+- 무명 객체 식 안에 로컬 변수 접근 가능
+
+```kotlin
+
+fun countClicks(window: Window) {
+  var clickCount = 0
+  window.addMouseListener(object: MouseAdapter() {
+    override fun mouseClicked(e: MouseEvent) {
+      clickCount++
+    }
+  })
+}
+```
+
+## 5. 요약
+- 코틀린 인터페이스는 디폴트 메소드와 프로퍼티를 포함
+- 모든 코틀린 선언은 기본 `public final`임
+- `final`을 안 붙이려면 `open` 키워드 사용
+- `internal`은 같은 모듈에서만 접근 가능
+- 중첩 클래스는 내부 클래스가 아님. `inner` 키워드를 통해 중첩 클래스 내에서 바깥 클래스에 대한 참조 가능
+- `sealed` 클래스를 사용하는 클래스를 정의하려면 반드시 부모 클래스 정의 안에 중첩 클래스로 정의
+- 초기화 블록과 부 생성자를 통해 인스턴스를 유연하게 초기화
+- `data class`를 사용하면 컴파일러가 `equals`, `hashCode`, `toString`, `copy` 등의 메소드를 자동으로 생성
+- 클래스 위임을 사용해 위임에 작성되는 보일러 플레이트 코드들을 예방
+- 객체 선언을 통해 싱글턴 클래스를 정의
