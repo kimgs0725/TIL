@@ -8,7 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Today I Learned',
   tagline: '공부 기록',
-  url: 'http://kimgs0725.github.io',
+  url: 'http://wondsn.github.io',
   baseUrl: '/til/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -24,13 +24,13 @@ const config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
-          editUrl: 'https://github.com/kimgs0725/til/edit/main',
+          editUrl: 'https://github.com/wondsn/til/edit/main',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            'https://github.com/kimgs0725/til/edit/main',
+            'https://github.com/wondsn/til/edit/main',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -52,12 +52,12 @@ const config = {
             label: 'Docs',
           },
           {
-            href: 'http://kimgs0725.github.io',
+            href: 'http://wondsn.github.io',
             label: 'Blog',
             position: 'left'
           },
           {
-            href: 'https://github.com/kimgs0725',
+            href: 'https://github.com/wondsn',
             label: 'GitHub',
             position: 'right',
           },
@@ -89,11 +89,11 @@ const config = {
             items: [
               {
                 label: 'Blog',
-                href: 'http://kimgs0725.github.io'
+                href: 'http://wondsn.github.io'
               },
               {
                 label: 'GitHub',
-                href: 'https://github.com/kimgs0725',
+                href: 'https://github.com/wondsn',
               },
             ],
           },
