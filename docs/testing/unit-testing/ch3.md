@@ -186,3 +186,114 @@ class CalculatorTest {
 >
 > 이 TIL에선 첫번째 정의를 사용한다.
 
+- 테스트 클래스 생성자에서 테스트 픽스처를 초기화하는 것이 좋은 방법
+
+```java
+public class CustomerTest {
+  private Store _store;
+  private Customer _sut;
+
+  @BeforeEach   // 매 테스트마다 실행 전 실행함
+  void setUp() {
+    _store = new Store();
+    _store.addInventory(Product.Shampoo, 10);
+    _sut = new Customer();
+  }
+
+  @Test
+  void Purchase_succeeds_when_enough_inventory() {
+    boolean success = _sut.Purchase(_store, Product.Shampoo, 5);
+    assertThat(success).isTrue();
+    assertThat(_store.getInventory()).isEqualTo(5);
+  }
+
+  @Test
+  void Purchase_succeeds_when_not_enough_inventory() {
+    boolean success = _sut.Purchase(_store, Product.Shampoo, 15);
+    assertThat(success).isFalse(); assertThat(_store.getInventory()).isEqualTo(10);
+  }
+}
+```
+
+- 준비 구절이 동일한 로직을 하나로 묶어서 코드 양을 크게 줄임
+- 하지만 두가지 큰 단점이 존재
+  - 테스트 간 결합도가 높음
+  - 테스트 가독성이 떨어짐
+
+### 테스트 간의 높은 결합도는 안티 패턴이다.
+
+- 다음 부분에 모든 테스트가 결합되었다고 볼 수 있음
+  ```java
+  _store.addInventory(Product.Shampoo, 10);
+  ```
+- 만약 `_store.addInventory(Product.Shampoo, 15)`로 수정하면 다른 테스트에도 영향이 감
+  - 두번째 테스트가 실패함
+- 테스트를 수정해도 다른 테스트에 영향을 주어선 안됨
+
+### 테스트 가독성을 떨어뜨리는 생성자 사용
+
+- 테스트 메서드가 무엇을 하는지 이해하려면 클래스의 다른 부분도 봐야함
+- 준비 로직이 별로 없더라도 테스트 메서드로 바로 옮기는 것이 좋음
+
+### 더 나은 테스트 픽스처 재사용법
+
+- 테스트 클래스에 비공개 팩토리 메소드를 두는 것
+
+```java
+public class CustomerTest {
+
+  @Test
+  void Purchase_succeeds_when_enough_inventory() {
+    Store store = CreateStoreWithInventory(Product.Shampoo, 10);
+    Customer sut = CreateCustomer();
+    boolean success = sut.Purchase(store, Product.Shampoo, 5);
+    assertThat(success).isTrue();
+    assertThat(_store.getInventory()).isEqualTo(5);
+  }
+
+  @Test
+  void Purchase_succeeds_when_not_enough_inventory() {
+    Store store = CreateStoreWithInventory(Product.Shampoo, 10);
+    Customer sut = CreateCustomer();
+    boolean success = _sut.Purchase(_store, Product.Shampoo, 15);
+    assertThat(success).isFalse(); assertThat(_store.getInventory()).isEqualTo(10);
+  }
+
+  private static Store CreateStoreWithInventory(Product product, int quantity) {
+    Store store = new Store();
+    store.addInventory(product, quantity)
+    return store;
+  }
+
+  private static Customer CreateCustomer() {
+    return new Customer();
+  }
+}
+```
+
+- 공통 초기화 로직을 비공개 팩토리 메서드로 추출
+  - 테스트 코드 짦게
+  - 전체적인 컨텍스트를 유지
+- 테스트 픽스처 재사용 규칙 예외
+  - 대부분의 테스트에 사용되는 경우 생성자에 픽스처를 인스턴스화
+  - ex. 데이터베이스 연결
+
+```java
+public class CustomerTest : IntegrationTest {
+  @Test
+  void purchase_succeeds_when_enough_inventory() {
+    ...
+  }
+}
+
+public abstract class IntegrationTest {
+  protected Database _database;
+
+  protected IntegrationTest() {
+    _database = new Database();
+  }
+}
+```
+
+## 4. 단위 테스트 명명법
+
