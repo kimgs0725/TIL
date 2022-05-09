@@ -355,3 +355,16 @@ void IsDeliveryValid_InvalidateDate_ReturnsFalse() {
     - `void Delivery_with_past_date_is_invalid()`
 - 마지막으로 관사까지 붙여서 문법을 완성시키면 됨
     - `void Delivery_with_a_past_date_is_invalid()`
+
+## 5. 매개변수화된 테스트 리팩토링히기
+
+- 동작이 충분히 복잡해질수록 테스트 수가 급증할 수 있음
+    - 매개변수화된 테스트를 사용하여 유사한 테스트를 묶을 수 있음
+
+```java
+void Delivery_for_today_is_valid()
+void Delivery_for_tomorrow_is_valid()
+void The_soonest_delivery_date_is_two_days_from_now()
+```
+- 위 메서드의 유일한 차이점은 배송날짜
+- JUnit5에선 **Parameterized Test**를 제공
