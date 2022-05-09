@@ -173,7 +173,7 @@ class CalculatorTest {
 
 ## 3. 테스트 간 테스트 픽스쳐 재사용
 
-- 준비 구절에서 코드를 재상요하는 ㄱ서이 테스트를 줄이면서 단순화하기 좋은 방법
+- 준비 구절에서 코드를 재사용 하는 것이 테스트를 줄이면서 단순화하기 좋은 방법
 - 별도의 메서드나 클래스로 도출한 후 테스트 간에 재사용하는 것이 좋음
 
 > **테스트 픽스쳐**
@@ -297,3 +297,61 @@ public abstract class IntegrationTest {
 
 ## 4. 단위 테스트 명명법
 
+- 지난 10년동안 `[테스트 대상 메서드]_[시나리오]_[예상 결과]`의 형태로 테스트 메서드를 명명
+- 프로그래머 눈에 논리적일 수 있으나 테스트 가독성에 실제로 도움되진 않음
+
+```java
+public class CalculatorTests {
+    // 기존 테스트 메서드 이름
+    @Test
+    void Sum_of_two_numbers() {
+        ...
+    }
+
+    // 새 테스트 메소드 이름
+    // 아래 메서드가 좀 더 논리적으로 보일 수 있으나
+    // 가독성 면에서는 위 메서드가 좀 더 좋음
+    @Test
+    void Sum_TwoNumbers_ReturnSum() {
+        ...
+    }
+}
+```
+
+- 테스트가 정확히 무엇을 검증하는지, 비즈니스 요구 사항과 어떤 관련이 있는지 파악하는데 리소스가 더 듦
+    - 테스트 유지비로 천천히 늘어나게 됨
+    - 그래서 테스트 가독성이 중요
+
+### 단위 테스트 명명 지침
+
+- 단위 테스트 명명 지침은 다음을 따름
+    - 엄격한 명명 정책을 따르지 않음. 표현의 자유를 허용
+    - 문제 도메인에 익숙하 비개발자들에게 시나리오를 설명하는 것처럼 테스트 이름을 명명
+    - 단어를 밑줄(_) 표시로 구분
+- JUnit에서는 [@DisplayName](https://junit.org/junit5/docs/5.0.3/api/org/junit/jupiter/api/DisplayName.html)을 통해서 이름을 커스텀하게 지을 수 있음
+
+### 예제: 지침에 따른 테스트 이름 변경
+
+```java
+@Test
+void IsDeliveryValid_InvalidateDate_ReturnsFalse() {
+    DeliveryService sut = new DeliveryService();
+    DateTime pastDate = DateTime.now().minusDay(1);
+    Delivery delivery = new Delivery(pastDate);
+
+    boolean isValid = sut.isDeliveryValid(delivery);
+    assertThat(isValid).isFalse();
+}
+```
+
+- 잘못된 날짜의 배송을 올바르게 식별하는지 검증
+- 다음과 같이 명명할 수 있음
+    - `void Delivery_with_invalid_date_should_be_considered_invalid()`
+    - 프로그래머 뿐만 아니라 사람들에게도 납득
+    - SUT가 테스트 명에 포함되지 않음 -> sut가 메소드에 포함되는 것은 안티 패턴
+- 그러면 `invalid_date`의 의미를 명확하게 반영해보자 -> 배송 날짜를 미래에서만 선택
+    - `void Delivery_with_past_date_should_be_considered_invalid()`
+- `should_be` 문구는 또 다른 안티 패턴, `shoule_be` 보단 `is`를 사용
+    - `void Delivery_with_past_date_is_invalid()`
+- 마지막으로 관사까지 붙여서 문법을 완성시키면 됨
+    - `void Delivery_with_a_past_date_is_invalid()`
