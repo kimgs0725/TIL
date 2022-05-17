@@ -335,12 +335,12 @@ public class CalculatorTests {
 ```java
 @Test
 void IsDeliveryValid_InvalidateDate_ReturnsFalse() {
-    DeliveryService sut = new DeliveryService();
-    DateTime pastDate = DateTime.now().minusDay(1);
-    Delivery delivery = new Delivery(pastDate);
+  DeliveryService sut = new DeliveryService();
+  LocalDateTime pastDate = LocalDateTime.now().plusDays(daysFromNow);
+  Delivery delivery = new Delivery(pastDate);
 
-    boolean isValid = sut.isDeliveryValid(delivery);
-    assertThat(isValid).isFalse();
+  boolean isValid = sut.isDeliveryValid(delivery);
+  assertThat(isValid).isFalse();
 }
 ```
 
@@ -368,3 +368,91 @@ void The_soonest_delivery_date_is_two_days_from_now()
 ```
 - 위 메서드의 유일한 차이점은 배송날짜
 - JUnit5에선 **Parameterized Test**를 제공
+
+```java
+@ParameterizedTest
+@CsvSource({"-1, false", "0, false", "1, false", "2, true"})
+void can_detect_an_invalid_delivery_date(long daysFromNow, boolean expected) {
+  DeliveryService sut = new DeliveryService();
+  LocalDateTime pastDate = LocalDateTime.now().plusDays(daysFromNow);
+  Delivery delivery = new Delivery(pastDate);
+
+  boolean isValid = sut.isDeliveryValid(delivery);
+  assertThat(isValid).isFalse();
+}
+```
+- junit5에선 2개 이상의 ParamerterizedTest가 필요할 때에는 `CsvSource`에 표현
+- 테스트 코드 비용을 절감하였으나, 테스트 메서드 사실 관계를 파악하기 힘듦
+- 긍정 테스트 케이스에 대해서 고유한 테스트로 도출
+
+
+```java
+@ParameterizedTest
+@ValueSource(int = {-1, 0, 1})
+void can_detect_an_invalid_delivery_date(long daysFromNow, boolean expected) {
+  /***/
+}
+
+@Test
+void the_soonest_delivery_date_is_two_days_from_now() {
+  /***/
+}
+```
+
+### 매개변수화된 테스트를 위한 데이터 생성
+- 매개변수 데이터 생성을 위해 파라미터로 컴파일러가 이해할 수 있는 값을 집어넣어야 함(ValueSource)
+  - `short`, `byte`, `int`, `long`, `float,` `double`, `char`, `String`, `Class`
+- 대신 `@MethodSource`를 이용해 파라미터 데이터를 생성해주는 함수를 매핑해줄 수 있음
+
+```java
+@ParameterizedTest
+@MethodSource("makeData")
+void test(LocalDateTime localDateTime, boolean expected) {
+  /***/
+}
+
+private Stream<Arguments> makeData() {
+  return Stream.of(
+    Arguments.of(LocalDateTime.now().plusDays(-1), false),
+    Arguments.of(LocalDateTime.now(), false),
+    Arguments.of(LocalDateTime.now().plusDays(1), false),
+    Arguments.of(LocalDateTime.now().plusDays(2), true)
+  );
+}
+```
+
+## 6. 검증문 라이브러리를 사용한 테스트 가독성
+
+- 테스트 가독성을 높이기 위한 검증문(Assert) 라이브러리를 사용
+  - 개인적으로는 junit5에서는 [AssertJ](https://joel-costigliola.github.io/assertj/)이 가독성면에서 뛰어나다고 봄
+```java
+@Test
+void sum_of_two_numbers() {
+  Calculator sut = new Calculator();
+  double result = sut.sum(10, 20);
+  // Jupiter Assertion 사용
+  assertEqual(result, 30);
+}
+
+...
+
+@Test
+void sum_of_two_numbers() {
+  Calculator sut = new Calculator();
+  double result = sut.sum(10, 20);
+  // AssertJ 사용
+  assertThat(result).isEqualTo(30);
+}
+``` 
+- 검증문은 쉬운 영어로 읽을 수 있어야 가독성이 높음
+  - 주로 `[주어] [행동] [목적어]` 패턴을 지님
+
+## 7. 요약
+
+- 모든 단위 테스트는 AAA 패턴(준비, 실행, 검증)을 따라야 함
+- 실행 구절이 한 줄 이상이면 SUT의 API에 이상이 있다는 뜻
+- SUT의 변수명을 `sut`로 지정해 SUT를 테스트에서 구분
+- 테스트 픽스처 초기화 코드는 팩토리 메서드를 도입하여 재사용
+- 엄격한 테스트 명명법을 도입하지 말 것
+- 매개변수화된 테스트를 통해 테스트 코드양을 줄일 수 있음
+- 검증문 라이브러리(AssertJ)를 사용하여 가독성 향상
