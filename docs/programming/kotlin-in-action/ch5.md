@@ -78,3 +78,76 @@ people.maxBy(Person::age) // Person::age 멤버 참조
 val sum = { x: Int, y: Int -> x + y }
 println(sum(1, 2))
 ```
+
+- 람다식을 선언과 동시에 호출할 수 있음.
+  - 하지만 이런 구문은 읽기도 힘들고 그다지 쓸모가 없음
+  - 대신 `run` 함수를 이용하여 람다를 대신 실행해줄 수 있음
+
+```kotlin
+{ println(42) }()
+run { println(42) }
+```
+
+- 다시 Person 예제로 돌아가서, `mayBy`에 람다함수를 사용하면 다음과 같음
+
+```kotlin
+val people = listOf(Person("Alice", 29), Person("Bob", 31))
+println(people.maxBy { it.age })    // Person("Bob", 31)
+```
+- 여기서 정식으로 람다를 풀어서 작성하면 다음과 같음
+```kotlin
+people.maxBy({ p: Person -> p.age })
+```
+- 여기서 코틀린은 함수 호출 시 맨 뒤에 있는 인자가 람다식이라면 괄호를 밖으로 빼낼 수 있는 문법 관습이 있음
+```kotlin
+people.maxBy() { p: Person -> p.age }
+```
+- 함수의 유일한 인자가 람다라면 빈 괄호도 없앨 수 있음
+```kotlin
+people.maxBy { p: Person -> p.age }
+```
+- 파라미터 타입을 없애서 다듬을 수 있음.
+  - 이는 컴파일러 단에서 타입을 추론할 수 있기 때문에 없앨 수 있음
+```kotlin
+people.maxBy { p -> p.age }
+```
+- 마지막으로 람다의 파라미터 이름을 디폴트 이름인 `it`로 바꾸면 람다 식을 더 간단하게 만들 수 있음
+  - 파라미터가 하나뿐이고, 그 타입을 컴파일러가 추론할 수 있는 경우 it을 바로 쓸 수 있음
+```kotlin
+people.maxBy { it.age }
+```
+- 만약 람다 안에 람다가 중첩되는 경우 it을 가리키는 파라미터가 어떤 것인지 파악하기 어려움
+
+### 4. 현재 영역에 있는 변수에 접근
+
+- 람다를 함수 안에 정의하면 람다 앞에 선언된 로컬 변수까지 람다에서 사용할 수 있음
+```kotlin
+fun printMessageWithPrefix(message: Collection<String>, prefix: String) {
+  message.forEach {
+    println("$prefix $it")
+  }
+}
+```
+
+- 자바와 다른 점
+  - 코틀린 람다 안에서는 파이널 변수가 아닌 변수에 접근할 수 있음
+  - 바깥의 변수를 변경해도 됨
+```kotlin
+fun printProblemCouts(responses: Collection<String>) {
+  var clientErrors = 0
+  var serverErrors = 0
+  responses.forEach {
+    if (it.startsWith("4")) {
+      clientErrors++
+    } else if (it.startsWith("5")) {
+      serverErrors++
+    }
+  }
+}
+```
+
+- 람다함수 안에 사용된 외부 변수를 **람다가 포획한 변수**라고 해서 **포획 변수**라고 함
+- 이는 로컬 변수의 생명주기와도 다르게 동작
+  - 로컬 변수는 보통 함수가 끝나면 끝남
+  - 하지만 포획 변수는 함수가 끝난 뒤에도 람다 본몬에선 여전히 포획 변수를 쓸 수 있음
+  - 파이널 변수를 포함한 경우, 람다 코드를 변수 값과 함께 저장
