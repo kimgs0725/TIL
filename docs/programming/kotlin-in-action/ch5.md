@@ -261,3 +261,98 @@ printlnt(numbers.mapValue { it.value.toUpperCase() })
 
 ### 3. groupBy: 리스트를 여러 그룹으로 이뤄진 맵으로 변경
 
+- 컬렉션의 모든 원소를 어떤 특성에 따라 여러 그룹으로 나누고 싶을 때 `groupBy`를 사용
+```kotlin
+val people = listOf(Person("Alice", 31), Person("Bob", 29), Person("Carol", 31))
+println(people.groupBy { it.age })  // {29=[Person("Bob", 29)], 31=[Person("Alice", 31),Person("Carol", 31)]}
+```
+
+![image](https://user-images.githubusercontent.com/4207192/169686027-cd886efa-d0cd-4618-a9eb-d985e58069d3.png)
+
+- `groupBy`의 결과 타입은 `Map<Int, List<Person>>`으로 반환
+
+### 4. flatMap과 flatten: 중첩된 컬렉션 안의 원소 처리
+
+- `flatMap` 함수는 인자로 주어진 람다를 컬렉션의 모든 객체에 적용 후, 각 컬렉션에서 얻은 결과를 한 리스트로 모아줌
+```kotlin
+val strings = listOf("abc", "def")
+println(strings.flatMap { it.toList() })  // ['a', 'b', 'c', 'd', 'e', 'f']
+```
+
+![image](https://user-images.githubusercontent.com/4207192/169686338-fbb393e4-ba7f-472e-b3b9-bd075788b5df.png)
+
+- `flatMap`함수를 자세히 뜯어보면, `map`함수와 `flatten`함수로 이루어져 있음
+- 리스트 안에 리스트가 있는 모든 중첩된 리스트의 원소를 한 리스트로 모아야 한다면 flatMap을 쓸 수 있음
+  - 하지만 특별히 반환해야 할 내용이 없다면, `flatte()`함수를 써서 리스트를 평형하게 만들 수 있음
+
+## 3. 지연 계산(lazy) 컬렉션 연산
+
+- `map`이나 `filter` 함수는 매 단계마다 중간 결과(리스트)를 반환
+  - 중간 결과를 새로운 컬렉션에 임시로 담음
+- **시퀀스(sequence)**를 사용하면 중간 임시 컬렉션을 쓰지 않고 컬렉션 연산을 연쇄할 수 있음
+```kotlin
+people.map(Person::name).filter { it.startsWith("A") }
+```
+- `map`과 `filter` 연산에서 리스트가 2개 만들어짐
+  - 원소의 개수가 적으면 상관없지만, 원소가 수백만개가 되면 효율이 떨어짐
+- 컬렉션을 직접 사용하는 대신 시퀀스를 사용
+```kotlin
+people.asSequence()     // 원본 컬렉션을 시퀀스로 변환
+  .map(Person::name)    // 시퀀스도 리스트와 동일한 API 제공
+  .filter { it.startsWith("A") }
+  .toList()             // 결과 시퀀스를 다시 리스트로 변환함
+```
+
+- `Sequence`는 한 번에 하나씩 열거될 수 있는 원소의 시퀀스를 표현(iterator)
+- 시퀀스의 원소를 필요할 때 비로소 계산이 시작
+
+### 1. 시퀀스 연산 실행: 중간 연산과 최종 연산
+
+- 중간 연산은 다른 시퀀스를 반환함. 그 시퀀스가 최초 시퀀스의 연산 변환 방법을 앎
+- 결과는 최초 콜렉션에 대해 변환을 적용한 시퀀스로부터 이련의 계산을 수행해 얻을 수 있는 컬렉션이나 원소, 숫자 또는 객체
+
+![image](https://user-images.githubusercontent.com/4207192/169688826-641d423c-4009-451e-9995-9f26ac4a17e3.png)
+
+- 중간 연산은 항상 지연 계산됨
+
+```kotlin
+listOf(1, 2, 3, 4).asSequence()
+  .map { print("map($it) "); it * it }
+  .filter { print("filter($it) "); it % 2 == 0 }
+```
+- 코드를 실행하면 아무 내용도 출력 안됨. `map`과 `filter` 변환이 늦춰져서 결과를 얻을 필요가 있을 때 적용
+
+```kotlin
+listOf(1, 2, 3, 4).asSequence()
+  .map { print("map($it) "); it * it }
+  .filter { print("filter($it) "); it % 2 == 0 }
+  .toList()   // map(1) filter(1) map(2) filter(4) map(3) filter(9) map(4) filter(16)
+```
+
+- 직접 연산을 구현한다면 `map` 함수를 각 원소에 대해 먼저 수행해서 새 시퀀스를 얻고
+- 그 시퀀스에 대해 다시 filter를 수행
+- 따라서, 원소에 연산을 차례대로 적용하다가 결과가 얻어지면, 그 이후의 원소에 대해서는 변환이 안 이뤄질 수 있음
+
+```kotlin
+listOf(1, 2, 3, 4).asSequence()
+  .map { it * it }
+  .find{ it > 3 }
+```
+- 시퀀스가 아닌 컬렉션에 수행하면 `map`의 결과가 먼저 평가돼 최초 컬렉션의 모든 원소가 변환됨
+  - 두번째 단계에서 `map`을 적용해서 얻은 중간 컬렉션부터 조건을 만족하는 원소를 찾음
+- 시퀀슬 사용한다면 지연 계산으로 인해 원소 중 일부 계산이 이뤄지지 않음
+
+![image](https://user-images.githubusercontent.com/4207192/169689330-31e11265-2bfb-49c4-9189-9b03c504256f.png)
+
+- 컬렉션에 대해 수행하는 연산의 순서도 성능에 영향을 끼침
+- `map`과 `filter`을 적용하여 나온 결과가 같더라도, 순서에 따라 성능이 결정됨
+```kotlin
+// 임의의 길이보다 짧은 사람의 명단 출력
+val people = listOf(Person("Alice", 29), Person("Bob", 31), Person("Charles", 31), Person("Dan", 21))
+println(people.asSequence().map(Person::name).filter {it.length < 4}.toList())    // map 다음에 filter 수행. [Bob, Dan]
+println(people.asSequence().filter {it.length < 4}.map(Person::name).toList())    // filter 다음에 map 수행. [Bob, Dan]
+```
+- `map`을 먼저하면 모든 원소를 반환, 하지만 `filter`를 먼저하면 부적절한 원소를 제외하기 때문에 성능을 더 향상시킬 수 있음
+
+![image](https://user-images.githubusercontent.com/4207192/169689763-bf6eb91c-90df-4c7a-8185-91747d7a20cf.png)
+
