@@ -356,3 +356,94 @@ println(people.asSequence().filter {it.length < 4}.map(Person::name).toList())  
 
 ![image](https://user-images.githubusercontent.com/4207192/169689763-bf6eb91c-90df-4c7a-8185-91747d7a20cf.png)
 
+### 2. 시퀀스 만들기
+
+- `asSequence()` 함수 뿐만 아니라 `generateSequence()`로도 시퀀스를 만들 수 있음
+
+```kotlin
+val naturalNumber = generateSequence(0) { it + 1 }
+val numbersTo1000 = naturalNumber.takeWhile { it <= 100 }
+println(numbersTo100.sum())   // 모든 지연 연산을 "sum"의 결과를 계산할 때 수행
+```
+- 0부터 100까지 자연수의 합을 구하는 프로그램
+- 리스트를 만들지 않고, 시퀀스의 한 원소로부터 **다음 원소를 계산하는 방법을 제공**하여 시퀀스 생성
+- 이런 특성을 이용해 감춰진 조상 디렉토리를 검사할 수 있음
+
+```kotlin
+fun File.isInsideHiddenDirectory() =
+  generateSequence(this) { it.parentFile }.any { it.isHidden }
+
+val file = File("/Users/svtk/.HiddenDir/a.txt")
+println(file.isInsideHiddenDirectory()) // true
+```
+
+## 4. 자바 함수형 인터페이스 활용
+
+- 이번 절에서 코틀린 람다를 자바 API에 활용할 수 있는지 알아봄
+```kotlin
+button.setOnClickListener { /* 클릭 시 수행할 동작 */ }
+```
+- `Button` 클래스는 `setOnClickListener` 메소드를 사용해 버튼의 리스너를 설정
+```java
+public class Button {
+  public void setOnClickListener(OnClickListener l) { ... }
+}
+```
+- 자바 8 이전의 자바에선 `setOnClickListener`에 인자를 넘기기 위해 무명 클래스의 인스턴스를 이용
+- 하지만 코틀린에선 무명 클래스 인스턴스 대신 람다를 넘길 수 있음
+```kotlin
+button.setOnClickListener { ... }
+```
+- 이런 코드가 작동하는 이유는 OnClickListener에 추상 메소드가 하나만 존재하기 때문
+  - 이런 인터페이스를 **함수형 인터페이스** 또는 **SAM(Single Abstract Method) 인터페이스**라고 함
+- 자바에는 `Runnable`이나 `Callable`과 같은 함수형 인터페이스와 그런 함수형 인터페이스를 활용하는 메소드가 많음
+- 하지만 코틀린은 무명 클래스 인스턴스 정의할 필요없이 람다만 넘길 수 있어서 깔끔한 코드로 남음
+
+### 1. 자바 메소드에 람다를 인자로 전달
+- 함수형 인터페이스를 인자로 원하는 자바 메소드에 **코틀린 람다**를 전달할 수 있음
+```java
+void postponeComputation(int delay, Runnable computation)
+```
+- 컴파일러는 자동으로 람다를 Runnable 인스턴스로 변환해줌
+```kotlin
+postponeComputation(1000) { println(42) }
+```
+- 람다와 무명 객체의 차이
+  - 무명 객체는 명시적으로 선언하는 경우 메소드를 호출할 때마다 객체가 새로 생성
+  - 람다는 정의가 들어있는 함수의 변수에 접근하지 않는 한 새로 생성하지 않음. 기존 객체가지고 재사용
+    - 람다가 주변 영역의 변수를 포획한다면 매 호출마다 같은 인스턴스를 사용할 수 없으므로 객체를 새로 생성함
+      ```kotlin
+      fun handleComputation(id: String) {
+        postponeComputation(1000) { println(id) } // handleComputation이 호출될 때마다, Runnable 인스턴스를 계속 생성
+      }
+      ```
+### 2. SAM 생성자: 람다를 함수형 인터페이스로 명시적으로 변경
+
+- SAM 생성자: 람다를 함수형 인터페이스의 인스턴스로 변환할 수 있게 컴파일러가 자동으로 생성한 함수
+- 컴파일러가 자동으로 람다를 함수형 인터페이스 무명 클래스로 바꾸지 못하는 경우 SAM 생성자를 사용할 수 있음
+
+```kotlin
+fun createAllDoneRunnable(): Runnable {
+  return Runnable { println("All done!") }
+}
+
+createAllDoneRunnable().run() // All done!
+```
+- SAM 생성자의 이름은 사용하려는 함수형 인터페이스와 이름이 같음
+- 람다로 생성한 인터페이스 인스턴스를 변수에 저장해야하는 경우에도 SAM 생성자를 사용할 수 있음
+
+```kotlin
+val listener = OnClickListener { view ->
+  val text = when (view.id) {
+    R.id.button1 -> "First Button"
+    R.id.button2 -> "Second Button"
+    else -> "Unknown button"
+  }
+  toast(text)
+}
+
+button1.setOnClickListener(listener)
+button2.setOnClickListener(listener)
+```
+
+## 5. 수신 객체 지정 람다: with와 apply
