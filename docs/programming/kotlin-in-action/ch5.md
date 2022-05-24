@@ -447,3 +447,76 @@ button2.setOnClickListener(listener)
 ```
 
 ## 5. 수신 객체 지정 람다: with와 apply
+
+### 1. with 함수
+
+- 어떤 객체의 반복하지 않고도 그 객체에 대해 다양한 연산을 수행하기 위해 `with` 함수를 제공
+
+```kotlin
+// with 함수 X
+fun alphabet(): String {
+  val result = StringBuilder()
+  for (letter in 'A'..'Z') {
+    result.append(letter)
+  }
+  result.append("\nNow I known the alphabet!")
+  return result.toString()  // StringBuilder 메소드를 호출하기 위해 result 인스턴스를 매번 붙여야함
+}
+
+
+// with 함수 O
+fun alphabet(): String {
+  val stringBuilder = StringBuilder()
+  return with(stringBuilder) {  // 메소드를 호출하려는 수신 객체를 지정
+    for (letter in 'A'..'Z') {
+      append(letter)            // this를 명시해 지정한 수신 객체의 메소드 호출
+    }
+    this.append("\nNow I known the alphabet!")  // this를 생략하고 메소드 호출 가능
+    this.toString()   // with 블록 마지막 줄에 반환하려는 객체를 return 없이 명시하여 반환
+  }
+}
+```
+
+- `with`는 2개 인자를 받음
+  - 첫번째 인자는 with 내에서 사용할 객체
+  - 두번째 인자는 람다 수신 객체. with 블록을 의미
+  - 코틀린 내 람다 규칙으로 인해 블록이 바깥으로 나와도 됨
+    ```kotlin
+    with(stringBuilder, { /* 여기서 stringBuilder 사용한 로직을 구현 */ })
+    ```
+- 더 나아가 객체를 생성과 동시에 사용 가능
+```kotlin
+fun alphabet(): String = return with(StringBuilder()) {
+  for (letter in 'A'..'Z') {
+    append(letter)
+  }
+  append("\nNow I known the alphabet!")
+  toString()
+}
+```
+- `with`의 반환값은 람다 코드의 실행한 결과
+
+### 2. apply 함수
+
+- `with`와 동일.
+```kotlin
+fun alphabet(): String = StringBuilder().apply {
+  for (letter in 'A'..'Z') {
+    append(letter)
+  }
+  append("\nNow I known the alphabet!")
+}.toString()
+```
+- 람다 내부에서 수신 객체를 명시하지 않는 점을 동일하지만, 반환값은 수신 객체 자기 자신이 반환됨
+
+## 6. 요약
+- 람다를 사용하여 코드 조각을 다름 함수의 인자로 넘길 수 있음
+- 람다가 함수 인자인 경우 괄호 밖으로 람다를 빼낼 수 있음
+  - 람다의 인자가 1개인 경우 인자의 이름을 지정하지 않고 `it`로 쓸 수 있음
+- 람다가 들어있는 바깥 함수의 변수를 읽거나 쓸 수 있음
+- 메소드, 생성자, 프로퍼티의 이름 앞에 `::`을 붙이면 각각에 대한 참조를 만들 수 있음
+- `filter`, `map`, `all`, `any` 함수를 이용해 컬렉션에 대한 대부분의 연산을 직접 원소를 이터레이션하지 않고 수행 가능
+- 시퀀스를 사용하여 중간 결과를 담는 컬렉션을 생성하지 않고 컬렉션에 대한 여러 연산을 조합할 수 있음
+- 함수형 인터페이스(Runnable, Callable, ...)를 인자로 받는 자바 함수를 호출할 경우 람다를 대신 넘길 수 있음
+- 수신 객체 지정 람다를 사용하여 미리 정해둔 수신 객체의 메소드를 직접 호출할 수 있음
+- `with` 함수를 이용해 어떤 객체에 대한 참조를 반복하지 않아도 됨. `apply`를 사용하여 어떤 객체라도 빌더 스타일의 API를 사용해 생성 및 초기화 할 수 있음
