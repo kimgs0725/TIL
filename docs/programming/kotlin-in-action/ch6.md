@@ -154,7 +154,7 @@ fun strLenSafe(s: String?): Int = s?.length ?: 0
 - 엘비스 연산자의 우항에는 `return`, `throw` 등의 연산을 넣을 수 잇음
 
 ```kotlin
-class Address(val streeAddress: String, val zipCode: int,
+class Address(val streeAddress: String, val zipCode: Int,
               val city: String, val coutry: String)
 class Company(val name: String, val address: Address?)
 class Person(val name: String, val company: Company?)
@@ -176,3 +176,100 @@ Elsestr. 47
 >>> printShippingLabel(Person("Alexey", null))
 java.lang.IllegalArgumentException: No address
 ```
+
+### 5. 안전한 캐스트: as?
+
+- `is`를 통해 미리 `as`로 변환 가능한 타입인지 검사해볼 수 있음
+- `as?` 연산자는 어떤 값을 지정한 타입으로 캐스트함
+
+![image](https://user-images.githubusercontent.com/4207192/174460211-c2e132de-3452-4362-b1b1-4cd4a90f72f9.png)
+
+```kotlin
+class Person(val firstName: String, val lastName: String) {
+    override fun equals(o: Any?): Boolean {
+        val otherPerson = o as? Person ?: return false
+        return otherPerson.firstName == firstName &&
+            otherPerson.lastName == lastName
+    }
+
+    override fun hasCode(): Int =
+        firstName.hashCode() * 37 + lastName.hashCode()
+}
+>>> val p1 = Person("Dmitry", "Jemerov")
+>>> val p2 = Person("Dmitry", "Jemerov")
+>>> println(p1 == p2)
+true
+>>> println(p1.equals(42))
+false
+```
+
+- 안전한 호출, 안전한 캐스트, 엘비스 연산자는 유용해서 코틀린 코드에 자주 사용
+
+### 6. 널 아님 단언: !!
+- 느낌표를 이중(!!)으로 사용하여 어떤 값이든 널이 될 수 없는 타입으로 강제로 바꿀 수 있음
+- 실제 널에 대해 !!을 적용하면 NPE가 발생
+
+![image](https://user-images.githubusercontent.com/4207192/174460431-a7bfe495-8621-4d95-a985-dcd3ff2359db.png)
+
+```kotlin
+fun ignoreNulls(s: String?) {
+    val sNotNull: String = s!!
+    println(sNotNull.length)
+}
+>>> ignoreNulls(null)
+Exception in thread "main" kotlin.KotlinNullPointerException
+```
+
+> !!라고 표시한 이유는 약간 의도한거라고 볼 수 있다.
+> 코틀린 설계자들은 컴파일러가 검증할 수 없는 단언을 사용하기 보다는 더 나은 방법을 찾아보라는
+> 의도를 넌지시 표현하려고 !!라는 못생긴 기호을 택했다.
+
+- 만약 호출된 함수가 언제나 다른 함수에 널이 아닌 값을 전달한다고 보장된다면 널 아님 단언문을 사용할 수 있음
+- !!를 널에 대해 사용해서 발생하는 에외스택 트레이스에 어떤 식에서 예외가 발생햇는지에 대한 정보가 들어있지 않음
+    - 그래서 연쇄적으로 !! 단언문을 쓰는 것을 피해야 함
+    - `person.company!!.address!!.country`
+
+### 7. let 함수
+
+- `let` 함수를 안전한 호출 연산자와 함께 사용하면 식을 평가해서 결과가 널인지 검사한 뒤, 그 결과를 변수에 넣는 작업을 간단한 식을 사용해 한꺼번에 처리 가능
+- `let`을 사용하는 가장 흔한 용례는 널이 될 수 잇는 값을 널이 아닌 값만 인자로 받는 함수에 넘기는 경우
+
+```kotlin
+fun sendEmailTo(email: String) { ... }
+
+>>> val email: String? = ...
+>>> sendEmailTo(email)
+ERROR: Type mismatch: inferred type is String? but String was expected
+```
+
+- `sendEmailTo`에 넘기기 위해서는 널인지 검사해야함
+
+```kotlin
+if (email != null) sendEmailTo(email)
+```
+- `let` 함수를 통해 자신의 수신 객체를 인자로 전달받은 람다에게 넘긴다
+
+![image](https://user-images.githubusercontent.com/4207192/174460760-186c85b2-d317-485f-b90b-920080299e85.png)
+
+- 따라서 다음 예제의 람다안에서 널이 될 수 없는 타입으로 `email`을 사용할 수 잇음
+
+```kotlin
+email?.let { email -> sendEmailTo(email) }
+email?.let { sendEmailTo(it) }  // it를 이용하여 람다식을 짧게 표현할 수 있음
+```
+
+```kotlin
+fun sendEmailTo(email: String) {
+    println("Sending email to $email")
+}
+
+>>> var email: String? = "yole@example.com"
+>>> email?.let { sendEmailTo(it) }
+Sending email to yole@example.com
+>>> email = null
+>>> email?.let { sendEmailTo(it) }
+```
+
+- 여러 값이 널인지 검사하기 위해 `let` 호출을 중첩시킬 수 있음
+- 하지만 코드가 복탑해져서 알아보기 가독성이 떨어짐
+- 이럴 땐, `if`를 사앙효여 모든 값을 한꺼번에 검사하는 것이 좋음
