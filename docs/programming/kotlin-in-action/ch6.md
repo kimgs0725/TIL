@@ -273,3 +273,176 @@ Sending email to yole@example.com
 - 여러 값이 널인지 검사하기 위해 `let` 호출을 중첩시킬 수 있음
 - 하지만 코드가 복탑해져서 알아보기 가독성이 떨어짐
 - 이럴 땐, `if`를 사앙효여 모든 값을 한꺼번에 검사하는 것이 좋음
+
+### 8. 나중에 초기화할 프로퍼티
+
+- 코틀린에서 클래스 안의 널이 될 수 없는 프로퍼티를 생성자 안에서 초기화하지 않고 특별한 메소드 안에서 초기화 할 수 없음
+    - 생성자에서 모든 프로퍼티를 초기화해야 함
+    - 널이 될 수 없는 타입의 프로퍼티는 반드시 널이 아닌 값으로 초기화
+
+```kotlin
+class MyService {
+    fun performAction(): String = "foo"
+}
+
+class MyTest {
+    // null로 초기화하기 위해 널이 될 수 있는 타입인 프로퍼티 선언
+    private var myService: MyService? = null
+
+    @Before
+    fun setUp() {
+        // setUp 메소드 안에서 진짜 초기값을 지정
+        myService = MyService()
+    }
+
+    @Test
+    fun testAction() {
+        // 반드시 널 가능성에 신경 써야 함. !!나 ?을 써야함
+        assertEquals("foo", myService!!.performAction())
+    }
+}
+```
+
+- 이를 해결하기 위해 `myService` 프로퍼티를 나중에 초기화(Late Initialized)할 수 있음
+- `lateinit` 변경자를 붙이면 프로퍼티를 나중에 초기화 할 수 있음
+
+```kotlin
+class MyService {
+    fun performAction(): String = "foo"
+}
+
+class MyTest {
+    // 초기화하지 않고 널이 될 수 없는 프로퍼티를 선언
+    private lateinit var myService: MyService
+
+    @Before
+    fun setUp() {
+        // setUp 메소드 안에서 진짜 초기값을 지정
+        myService = MyService()
+    }
+
+    @Test
+    fun testAction() {
+        // 널 검사를 수행하지 않고 프로퍼티를 사용
+        assertEquals("foo", myService.performAction())
+    }
+}
+```
+
+- 이 때, 나중에 초기화하려는 프로퍼티는 항상 `var`이어야 함
+- 프로퍼티를 초기화하기 전에 프로퍼티에 접근하면 `lateinit property myService has not been initialized` 예외 발생
+
+### 9. 널이 될 수 있는 타입 확장#
+- 널이 될 수 있는 타입에 대한 확장 함수를 정의하면 null 값을 다루는 강력한 도구로 활용 가능
+- 확장 함수의 경우, 직접 변수에 대해 메서드를 호출하면 알아서 널 차리를 해줍니다.
+
+```kotlin
+// null이 될 수 있는 수신 객체에 대해 확장 함수 호출
+fun verifyUserInput(input: String?) {
+    if(input.isNullOrBlank()) {
+        println("Please fill in the required fields")
+    }
+}
+verifyUserInput(" ")  // "Please fill in the required fields"
+verifyUserInput(null) // "Please fill in the required fields"
+```
+
+- 자바에서는 메서드 안의 this는 그 메서드가 호출된 수신 객체를 가리키므로 항상 널이 아님.
+- 코틀린에서는 앞에서 살펴본 let 함수도 널이 될 수 있는 타입의 값에 대해 호출할 수 있지만 let은 this가 널인지 검사하지 않음
+
+```kotlin
+>>> val person: Person? = ...
+>>> person.let { sendEmailTo(it) }
+ERROR: Type mismatch: inferred type is Person? but Person was expected
+```
+- 확장 함수를 작성한다면, 확장 함수를 널이 될 수 있는 타입에 대해 정의할지 여부를 고민할 필요가 있음
+- 처음에는 널이 될 수 없는 타입에 대한 확장 함수를 정의
+- 나중에 널이 될 수 있는 타입에 대해 호출했다면 여기서 널을 제대로 처리하게 되면 안전하게 그 확장 함수를 널이 될 수 있는 타입에 대한 확장 함수로 바꿀 수 있습니다.
+
+### 10. 타입 파라미터의 널 가능성#
+
+```kotlin
+fun <T> printHashCode(t: T) {
+    println(t?.hashCode())
+}
+printHashCode(null) // null, 해당 경우 "T"의 타입은 "Any?"로 추론됩니다.
+```
+- 타입 파라미터가 널이 아님을 확실히 하려면 널이 될 수 없는 타입 상한(upper bound)를 지정
+
+```kotlin
+// 널이 될 수 없도록 상한을 사용합니다.
+fun <T: Any> printHashCode(t: T) {  // T는 널이 될 수 없는 타입입니다.
+    println(t.hashCode())
+}
+printHashCode(null) // Error, 이 코드는 컴파일 되지 않습니다.
+printHashCode(42)   // 42
+```
+- 타입 파라미터는 널이 될 수 있는 타입을 표시하려면 반드시 물음표를 타입 이름 뒤에 붙여야 한다는 규칙의 유일한 예외
+
+### 11. 널 가능성과 자바#
+- 자바의 경우, 애노테이션으로 널 가능성 정보를 지정할 수 있습니다.
+    - `@Nullable Type = Type?`
+    - `@NotNull Type = Type`
+- 널 가능성 애노테이션이 소스코드에 없는 경우에는 자바의 타입은 코틀린의 플랫폼 타입(platform type)
+
+#### 플랫폼 타입
+- 플랫폼 타입은 코틀린이 널 관련 정보를 알 수 없는 타입을 의미
+
+```kotlin
+Type = Type? or Type
+public class Person {
+  private final String anme;
+  public Person(String name) { this.name = name; }
+  public String getName() { return name; }
+}
+```
+- 위의 코드에서는 코틀린 컴파일러는 String 타입의 널 가능성에 대해 전혀 알지 못함
+
+```kotlin
+fun yellAt(person: Person) {
+  println(person.name.toUpperCase() + "!!!")
+}
+yellAt(Person(null))  //   java.lang.IllegalArgumentException: Paramter specified as non-null is null
+```
+
+- 코틀린 컴파일러는 공개(public) 가시성인 코틀린 함수의 널이 아닌 타입인 파라미터와 수신 객체에 대한 널 검사를 추가
+
+```kotlin
+fun yellAtSafe(person: Person) {
+  println((person.name ?: "AnyOne").toUpperCase() + "!!!")
+}
+yellAtSafe(Person(null))  // ANYONE!!!
+```
+- 코틀린은 플랫폼 타입을 통해서, 불필요한 널 검사를 줄일 수 있음.
+- 특히 제네릭을 다룰 때 상황이 안좋아지기 때문에, 이를 프로그래머에게 책임을 부여하는 실용적인 접근 방법을 사용
+
+```kotlin
+val s: String? = person.name  // 자바 프로퍼티를 널이 될 수 있는 타입으로 볼 수 있습니다.
+val s1: String = person.name  // 자바 프로퍼티를 널이 될 수 없는 타입으로도 볼 수 있습니다.
+```
+
+#### 상속
+- 코틀린에서 자바 메서드를 오버라이드할 때 그 메서드의 파라미터와 반환 타입을 **널이 될 수 있는 타입**으로 선언할지 **널이 될 수 없는 타입**으로 선언할지 결정
+
+```kotlin
+interface StringProcessor {
+    void process(String value);
+}
+
+// 코틀린에서 자바 인터페이스를여러 다른 널 가능성으로 구현합니다.
+class StringPrinter : StringProcessor {
+    override fun process(value: String) {
+        println(value)
+    }
+}
+
+class NullableStringPrinter : StringProcessor {
+    override fun process(value: String?) {
+        if (value != null) {
+            println(value)
+        }
+    }
+}
+```
+- 자바 클래스나 인터페이스를 코틀린에서 구현할 경우 널 가능성을 제대로 처리하는 일이 중요
+- 코틀린 컴파일러는 널이 될 수 없는 타입으로 선언한 모든 파라미터에 대해 널이 아님을 검사하는 단언문을 만들어 줄 수 있음
