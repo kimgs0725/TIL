@@ -15,9 +15,9 @@ title: 5. 목과 테스트 취약성
 - 목: 외부로 나가는 상호 작용을 모방하고 검사하는데 도움을 줌. 유사 대역으로 스파이가 있음
 - 스텁: 내부로 들어오는 상호 작용을 모방하는데 도움이 됨, 유사 역할로 더미, 페이크가 있음
 
-<img width="443" alt="image" src="https://user-images.githubusercontent.com/4207192/217382399-b51c70e1-d1e9-49e2-8a16-9adec5529907.png">
+<img width="443" alt="image" src="https://user-images.githubusercontent.com/4207192/217382399-b51c70e1-d1e9-49e2-8a16-9adec5529907.png"/>
 
-<img width="443" alt="image" src="https://user-images.githubusercontent.com/4207192/217383628-a046094a-cb34-41ab-9d07-831286ddb091.png">
+<img width="443" alt="image" src="https://user-images.githubusercontent.com/4207192/217383628-a046094a-cb34-41ab-9d07-831286ddb091.png"/>
 
 ### 1.1 도구로서의 목과 테스트 대역으로서의 목
 
